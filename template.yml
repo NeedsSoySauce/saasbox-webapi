@@ -1,0 +1,151 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: saasbox-webapi
+
+Transform: AWS::Serverless-2016-10-31
+
+Globals:
+  Function:
+    Runtime: nodejs14.x
+    MemorySize: 256
+    Timeout: 100
+
+Resources:
+  restApiGateway:
+    Type: AWS::Serverless::Api
+    DependsOn:
+      - authFunction
+    MethodSettings:
+      ThrottlingBurstLimit: 60
+      ThrottlingRateLimit: 10
+    Properties:
+      StageName: Prod
+      Auth:
+        DefaultAuthorizer: LambdaRequestAuthorizer
+        Authorizers:
+          LambdaRequestAuthorizer:
+            FunctionPayloadType: REQUEST
+            FunctionArn: !GetAtt authFunction.Arn
+            Identity:
+              Headers:
+                - Auth
+              ReauthorizeEvery: 300
+
+  authFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/handlers/auth/authorizer.handler
+
+  createItemFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/handlers/items/create.createItemHandler
+      Description: Creates an item
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref dynamoDbTable
+      Environment:
+        Variables:
+          DYNAMODB_TABLE: !Ref dynamoDbTable
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /items
+            Method: POST
+            RestApiId:
+              Ref: restApiGateway
+
+  readItemFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/handlers/items/read.readItemHandler
+      Description: Gets an item
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref dynamoDbTable
+      Environment:
+        Variables:
+          DYNAMODB_TABLE: !Ref dynamoDbTable
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /items/{id}
+            Method: GET
+            RestApiId:
+              Ref: restApiGateway
+
+  readItemsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/handlers/items/read.readItemHandler
+      Description: Gets all items
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref dynamoDbTable
+      Environment:
+        Variables:
+          DYNAMODB_TABLE: !Ref dynamoDbTable
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /items
+            Method: GET
+            RestApiId:
+              Ref: restApiGateway
+
+  updateItemFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/handlers/items/update.updateItemHandler
+      Description: Updates an item
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref dynamoDbTable
+      Environment:
+        Variables:
+          DYNAMODB_TABLE: !Ref dynamoDbTable
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /items/{id}
+            Method: PUT
+            RestApiId:
+              Ref: restApiGateway
+
+  deleteItemFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/handlers/items/delete.deleteItemHandler
+      Description: Deletes an item
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref dynamoDbTable
+      Environment:
+        Variables:
+          DYNAMODB_TABLE: !Ref dynamoDbTable
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /items/{id}
+            Method: DELETE
+            RestApiId:
+              Ref: restApiGateway
+
+  dynamoDbTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      PrimaryKey:
+        Name: id
+        Type: String
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+
+Outputs:
+  WebEndpoint:
+    Description: "API Gateway endpoint URL for Prod stage"
+    Value: !Sub "https://${restApiGateway}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
