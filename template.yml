@@ -14,11 +14,13 @@ Resources:
     Type: AWS::Serverless::Api
     DependsOn:
       - authFunction
-    MethodSettings:
-      ThrottlingBurstLimit: 60
-      ThrottlingRateLimit: 10
     Properties:
       StageName: Prod
+      MethodSettings:
+        - HttpMethod: "*"
+          ResourcePath: "/*"
+          ThrottlingBurstLimit: 60
+          ThrottlingRateLimit: 10
       Auth:
         DefaultAuthorizer: LambdaRequestAuthorizer
         Authorizers:
