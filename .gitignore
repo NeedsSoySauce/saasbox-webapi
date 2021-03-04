@@ -2,3 +2,4 @@ node_modules
 samconfig.toml
 .aws-sam
 .vscode
+template.yml

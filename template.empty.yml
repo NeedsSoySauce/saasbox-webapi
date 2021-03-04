@@ -36,6 +36,13 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: src/handlers/auth/authorizer.handler
+      Environment:
+        Variables:
+          JWKS_URI: ""
+          AUDIENCE: ""
+          ISSUER: ""
+          ALGORITHM: ""
+          KID: ""
 
   createItemFunction:
     Type: AWS::Serverless::Function

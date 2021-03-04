@@ -1,15 +1,38 @@
-exports.handler = function (event, context, callback) {
-    // AWS used the Authorization header for signing requests, so we need a different header for tokens
-    let token = event.headers.Auth;
+const jwt = require('jsonwebtoken')
+const jwksClient = require('jwks-rsa');
 
-    // TODO: actually validate the token
-    if (!token) {
+const jwksUri = process.env.JWKS_URI;
+const audience = process.env.AUDIENCE;
+const issuer = process.env.ISSUER;
+const algorithms = [process.env.ALGORITHM];
+const kid = process.env.KID;
+
+const client = jwksClient({
+    jwksUri,
+    rateLimit: true
+});
+
+exports.handler = async function (event, context, callback) {
+    // AWS uses the Authorization header for signing requests, so we use a custom 'Auth' header for tokens
+    let accessToken = event.headers.Auth?.replace('Bearer ', '');
+
+    if (!accessToken) {
         callback("Unauthorized");
-        return;
     }
 
-    const policy = {
-        principalId: "userId",
+    const signingKey = await (await client.getSigningKeyAsync(kid)).getPublicKey();
+
+    try {
+        const token = jwt.verify(accessToken, signingKey, { audience, issuer, algorithms })
+        callback(null, createPolicy(token.sub));
+    } catch (e) {
+        callback("Unauthorized");
+    }
+};
+
+function createPolicy(principalId) {
+    return {
+        principalId,
         policyDocument: {
             Version: "2012-10-17",
             Statement: [
@@ -21,6 +44,4 @@ exports.handler = function (event, context, callback) {
             ]
         }
     }
-
-    callback(null, policy);
-};
+}
