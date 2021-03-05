@@ -1,4 +1,4 @@
-const jwt = require('jsonwebtoken')
+const jwt = require('jsonwebtoken');
 const jwksClient = require('jwks-rsa');
 
 const jwksUri = process.env.JWKS_URI;
@@ -17,31 +17,34 @@ exports.handler = async function (event, context, callback) {
     let accessToken = event.headers.Auth?.replace('Bearer ', '');
 
     if (!accessToken) {
-        callback("Unauthorized");
+        callback('Unauthorized');
     }
 
     const signingKey = await (await client.getSigningKeyAsync(kid)).getPublicKey();
 
     try {
-        const token = jwt.verify(accessToken, signingKey, { audience, issuer, algorithms })
+        const token = jwt.verify(accessToken, signingKey, { audience, issuer, algorithms });
         callback(null, createPolicy(token.sub));
     } catch (e) {
-        callback("Unauthorized");
+        callback('Unauthorized');
     }
 };
 
-function createPolicy(principalId) {
+function createPolicy(userId) {
     return {
-        principalId,
+        principalId: userId,
         policyDocument: {
-            Version: "2012-10-17",
+            Version: '2012-10-17',
             Statement: [
                 {
-                    Action: "execute-api:Invoke",
-                    Effect: "Allow",
-                    Resource: "*"
+                    Action: 'execute-api:Invoke',
+                    Effect: 'Allow',
+                    Resource: '*'
                 }
             ]
+        },
+        context: {
+            userId
         }
-    }
+    };
 }

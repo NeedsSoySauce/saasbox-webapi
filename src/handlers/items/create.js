@@ -6,13 +6,33 @@ const docClient = new dynamodb.DocumentClient();
 const tableName = process.env.DYNAMODB_TABLE;
 
 exports.createItemHandler = async (event) => {
-    const body = JSON.parse(event.body)
-    const item = { ...body, id: uuidv4() }
+    const userId = event.requestContext.authorizer.userId;
+
+    let body = null;
+    try {
+        body = JSON.parse(event.body);
+    } catch (e) {
+        return {
+            statusCode: 400
+        }
+    }
+
+    if (typeof body !== 'object' || Array.isArray(body)) {
+        return {
+            statusCode: 400
+        }
+    }
+
+    const item = {
+        ...body,
+        id: userId,
+        sid: 'item_' + uuidv4()
+    }
 
     await docClient.put({
         TableName: tableName,
         Item: item,
-        ConditionExpression: "attribute_not_exists(id)"
+        ConditionExpression: "attribute_not_exists(id) and attribute_not_exists(sid)"
     }).promise();
 
     const response = {
