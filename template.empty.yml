@@ -8,6 +8,17 @@ Globals:
     Runtime: nodejs14.x
     MemorySize: 256
     Timeout: 100
+    Environment:
+      Variables:
+        JWKS_URI: ""
+        AUDIENCE: ""
+        ISSUER: ""
+        ALGORITHM: ""
+        KID: ""
+        DYNAMODB_TABLE: !Ref dynamoDbTable
+        CLOUDINARY_CLOUD_NAME: ""
+        CLOUDINARY_API_KEY: ""
+        CLOUDINARY_API_SECRET: ""
 
 Resources:
   restApiGateway:
@@ -36,13 +47,6 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: src/handlers/auth/authorizer.handler
-      Environment:
-        Variables:
-          JWKS_URI: ""
-          AUDIENCE: ""
-          ISSUER: ""
-          ALGORITHM: ""
-          KID: ""
 
   createItemFunction:
     Type: AWS::Serverless::Function
@@ -52,9 +56,6 @@ Resources:
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref dynamoDbTable
-      Environment:
-        Variables:
-          DYNAMODB_TABLE: !Ref dynamoDbTable
       Events:
         Api:
           Type: Api
@@ -72,9 +73,6 @@ Resources:
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref dynamoDbTable
-      Environment:
-        Variables:
-          DYNAMODB_TABLE: !Ref dynamoDbTable
       Events:
         Api:
           Type: Api
@@ -92,9 +90,6 @@ Resources:
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref dynamoDbTable
-      Environment:
-        Variables:
-          DYNAMODB_TABLE: !Ref dynamoDbTable
       Events:
         Api:
           Type: Api
@@ -112,9 +107,6 @@ Resources:
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref dynamoDbTable
-      Environment:
-        Variables:
-          DYNAMODB_TABLE: !Ref dynamoDbTable
       Events:
         Api:
           Type: Api
@@ -132,9 +124,6 @@ Resources:
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref dynamoDbTable
-      Environment:
-        Variables:
-          DYNAMODB_TABLE: !Ref dynamoDbTable
       Events:
         Api:
           Type: Api
@@ -145,11 +134,19 @@ Resources:
               Ref: restApiGateway
 
   dynamoDbTable:
-    Type: AWS::Serverless::SimpleTable
+    Type: AWS::DynamoDB::Table
     Properties:
-      PrimaryKey:
-        Name: id
-        Type: String
+      BillingMode: PROVISIONED
+      AttributeDefinitions:
+        - AttributeName: pk
+          AttributeType: S
+        - AttributeName: sk
+          AttributeType: S
+      KeySchema:
+        - AttributeName: pk
+          KeyType: HASH
+        - AttributeName: sk
+          KeyType: RANGE
       ProvisionedThroughput:
         ReadCapacityUnits: 1
         WriteCapacityUnits: 1

@@ -10,8 +10,8 @@ exports.updateItemHandler = async (event) => {
 
     const item = {
         ...body,
-        id: userId,
-        sid: 'item_' + id
+        pk: userId,
+        sk: 'item_' + id
     }
 
     await docClient.put({

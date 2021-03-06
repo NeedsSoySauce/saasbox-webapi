@@ -8,8 +8,8 @@ exports.deleteItemHandler = async (event) => {
     const id = event.pathParameters.id;
 
     const key = {
-        id: userId,
-        sid: 'item_' + id
+        pk: userId,
+        sk: 'item_' + id
     }
 
     await docClient.delete({

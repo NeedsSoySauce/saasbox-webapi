@@ -8,27 +8,30 @@ exports.readItemHandler = async (event) => {
     const id = event.pathParameters?.id;
 
     if (id) {
-        if (!id.startsWith(userId))
-            return createResponse(null, 404);
+        if (!id.startsWith(userId)) return createResponse(null, 404);
 
-        let result = await docClient.get({
-            TableName: tableName,
-            Key: { id }
-        }).promise();
+        let result = await docClient
+            .get({
+                TableName: tableName,
+                Key: { pk: userId, sk: 'item_' + id }
+            })
+            .promise();
         return createResponse(result.Item, result.Item ? 200 : 404);
     } else {
-        let result = await docClient.query({
-            TableName: tableName,
-            Limit: 10,
-            KeyConditionExpression: `id = :userId and begins_with(sid, :prefix)`,
-            ExpressionAttributeValues: {
-                ":userId": userId,
-                ":prefix": "item_"
-            }
-        }).promise();
+        let result = await docClient
+            .query({
+                TableName: tableName,
+                Limit: 10,
+                KeyConditionExpression: `pk = :userId and begins_with(sk, :prefix)`,
+                ExpressionAttributeValues: {
+                    ':userId': userId,
+                    ':prefix': 'item_'
+                }
+            })
+            .promise();
         return createResponse(result.Items, 200);
     }
-}
+};
 
 function createResponse(result, statusCode) {
     return {
