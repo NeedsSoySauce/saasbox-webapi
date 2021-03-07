@@ -1,25 +1,23 @@
-const dynamodb = require('aws-sdk/clients/dynamodb');
-const docClient = new dynamodb.DocumentClient();
+const Item = require('../../models/item.js');
+const ItemsRepo = require('../../data/itemsRepo.js');
+const StorageService = require('../../services/storage.js');
 
-const tableName = process.env.DYNAMODB_TABLE;
+const storageService = new StorageService();
+const itemsRepo = new ItemsRepo(storageService);
 
 exports.deleteItemHandler = async (event) => {
     const userId = event.requestContext.authorizer.userId;
     const id = event.pathParameters.id;
 
-    const key = {
-        pk: userId,
-        sk: 'item_' + id
+    try {
+        await itemsRepo.deleteItem(userId, id);
+    } catch (e) {
+        return {
+            statusCode: 500
+        };
     }
 
-    await docClient.delete({
-        TableName: tableName,
-        Key: key
-    }).promise();
-
-    const response = {
+    return {
         statusCode: 204
     };
-
-    return response;
-}
+};

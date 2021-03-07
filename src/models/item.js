@@ -1,14 +1,17 @@
-const Model = require('./model.js');
+class Item {
+    static Meta = class {
+        static prefix = 'item_';
 
-class Item extends Model {
-    static ITEM_PREFIX = 'item_';
+        static generatePartitionKey(item) {
+            return item.userId;
+        }
 
-    id;
-    userId;
-    url;
+        static generateSortKey(item) {
+            return Item.Meta.prefix + item.id;
+        }
+    };
 
     constructor(id, userId, url) {
-        super(userId, Item.ITEM_PREFIX + id);
         this.id = id;
         this.userId = userId;
         this.url = url;

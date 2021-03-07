@@ -1,12 +1,9 @@
-const { v4: uuidv4 } = require('uuid');
-const { uploadText } = require('../../services/storage.js');
-
-const dynamodb = require('aws-sdk/clients/dynamodb');
-const docClient = new dynamodb.DocumentClient();
-
 const Item = require('../../models/item.js');
+const ItemsRepo = require('../../data/itemsRepo.js');
+const StorageService = require('../../services/storage.js');
 
-const tableName = process.env.DYNAMODB_TABLE;
+const storageService = new StorageService();
+const itemsRepo = new ItemsRepo(storageService);
 
 exports.createItemHandler = async (event) => {
     const userId = event.requestContext.authorizer.userId;
@@ -26,18 +23,15 @@ exports.createItemHandler = async (event) => {
         };
     }
 
-    const id = uuidv4();
-    const url = await uploadText(body.content, id);
-
-    const item = new Item(id, userId, url);
-
-    await docClient
-        .put({
-            TableName: tableName,
-            Item: item,
-            ConditionExpression: 'attribute_not_exists(id) and attribute_not_exists(sid)'
-        })
-        .promise();
+    let item;
+    try {
+        item = await itemsRepo.addItem(new Item(null, userId, null), body.content);
+    } catch (e) {
+        console.error(JSON.stringify(e));
+        return {
+            statusCode: 500
+        };
+    }
 
     return {
         statusCode: 201,
