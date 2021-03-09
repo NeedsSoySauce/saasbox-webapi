@@ -58,17 +58,16 @@ class ItemsRepo {
      * Updates the given item in this repository.
      *
      * @param {Item} item The item to update (only the id and userId are required).
-     * @param {Item} newItem The new item (the id and userId cannot be changed).
-     * @param {string} content The content for the new item or null if it's unchanged.
+     * @param {string} newContent The content for the new item or null if it's unchanged.
      * @returns {Promise<Item>} A new item with the updated value(s).
      */
-    async updateItem(item, newItem, content) {
+    async updateItem(item, newContent) {
         const id = item.id;
 
         let url = item.url;
-        if (content) {
+        if (newContent) {
             try {
-                url = await this.storageService.uploadText(content, id);
+                url = await this.storageService.uploadText(newContent, id);
             } catch (e) {
                 throw Error('Failed to upload content.');
             }
@@ -99,7 +98,7 @@ class ItemsRepo {
 
     /**
      * @param {string} userId
-     * @returns {Item[]} An array of items with the given userId.
+     * @returns {Promise<Item[]>} An array of items with the given userId.
      */
     async getItems(userId) {
         // #TODO: implement pagination
@@ -110,13 +109,12 @@ class ItemsRepo {
                 KeyConditionExpression: `pk = :userId and begins_with(sk, :prefix)`,
                 ExpressionAttributeValues: {
                     ':userId': userId,
-                    ':prefix': 'item_'
+                    ':prefix': Item.Meta.prefix
                 },
                 ProjectionExpression: 'id, userId, #url',
                 ExpressionAttributeNames: {
                     '#url': 'url'
                 }
-
             })
             .promise();
 
@@ -130,7 +128,7 @@ class ItemsRepo {
     /**
      * @param {string} userId
      * @param {string} itemId
-     * @returns {Item} The item with the given userId and item id, or null if no such item exists.
+     * @returns {Promise<Item>} The item with the given userId and item id, or null if no such item exists.
      */
     async getItem(userId, itemId) {
         const item = new Item(itemId, userId, null);

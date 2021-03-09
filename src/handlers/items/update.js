@@ -11,9 +11,14 @@ exports.updateItemHandler = async (event) => {
     const id = event.pathParameters.id;
 
     const item = await itemsRepo.getItem(userId, id);
-    const newItem = new Item(id, userId, null);
 
-    const updatedItem = await itemsRepo.updateItem(item, newItem, body.content);
+    if (item === null) {
+        return {
+            statusCode: 404
+        };
+    }
+
+    const updatedItem = await itemsRepo.updateItem(item, body.content);
 
     const response = {
         statusCode: 201,

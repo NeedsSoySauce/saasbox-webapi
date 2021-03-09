@@ -1,4 +1,3 @@
-const Item = require('../../models/item.js');
 const ItemsRepo = require('../../data/itemsRepo.js');
 const StorageService = require('../../services/storage.js');
 
