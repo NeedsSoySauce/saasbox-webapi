@@ -35,6 +35,9 @@ exports.createItemHandler = async (event) => {
 
     return {
         statusCode: 201,
-        body: JSON.stringify(item)
+        body: JSON.stringify(item),
+        headers: {
+            Location: item.url
+        }
     };
 };
