@@ -13,8 +13,9 @@ const client = jwksClient({
 });
 
 exports.handler = async function (event, context, callback) {
-    // AWS uses the Authorization header for signing requests, so we use a custom 'Auth' header for tokens
-    let accessToken = event.headers.Auth?.replace('Bearer ', '');
+    // AWS uses the Authorization header for signing requests, so we have to use a custom 'Auth' header for tokens
+    // Note: Headers are case-insensitive, but HTTP/2 specifies headers should be lowercase
+    let accessToken = event.headers.auth?.replace('Bearer ', '');
 
     if (!accessToken) {
         callback('Unauthorized');
