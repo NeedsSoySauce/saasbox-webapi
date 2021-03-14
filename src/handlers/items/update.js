@@ -1,11 +1,12 @@
 const ItemsRepo = require('../../data/itemsRepo.js');
+const { withDefaultMiddleWare } = require('../../lib/config.js');
 const Item = require('../../models/item.js');
 const StorageService = require('../../services/storage.js');
 
 const storageService = new StorageService();
 const itemsRepo = new ItemsRepo(storageService);
 
-exports.updateItemHandler = async (event) => {
+const handler = async (event) => {
     const userId = event.requestContext.authorizer.userId;
     const body = JSON.parse(event.body);
     const id = event.pathParameters.id;
@@ -27,3 +28,5 @@ exports.updateItemHandler = async (event) => {
 
     return response;
 };
+
+exports.updateItemHandler = withDefaultMiddleWare(handler);

@@ -27,6 +27,11 @@ Resources:
       - authFunction
     Properties:
       StageName: Prod
+      Cors:
+        AllowMethods: "'*'"
+        AllowHeaders: "'Auth'"
+        AllowOrigin: "'*'"
+        MaxAge: "'600'"
       MethodSettings:
         - HttpMethod: "*"
           ResourcePath: "/*"
@@ -34,6 +39,7 @@ Resources:
           ThrottlingRateLimit: 10
       Auth:
         DefaultAuthorizer: LambdaRequestAuthorizer
+        AddDefaultAuthorizerToCorsPreflight: false
         Authorizers:
           LambdaRequestAuthorizer:
             FunctionPayloadType: REQUEST

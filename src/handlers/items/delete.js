@@ -1,10 +1,11 @@
 const ItemsRepo = require('../../data/itemsRepo.js');
+const { withDefaultMiddleWare } = require('../../lib/config.js');
 const StorageService = require('../../services/storage.js');
 
 const storageService = new StorageService();
 const itemsRepo = new ItemsRepo(storageService);
 
-exports.deleteItemHandler = async (event) => {
+const handler = async (event) => {
     const userId = event.requestContext.authorizer.userId;
     const id = event.pathParameters.id;
 
@@ -20,3 +21,5 @@ exports.deleteItemHandler = async (event) => {
         statusCode: 204
     };
 };
+
+exports.deleteItemHandler = withDefaultMiddleWare(handler);

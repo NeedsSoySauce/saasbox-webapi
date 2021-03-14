@@ -19,6 +19,8 @@ The specific technologies used in this project are:
 * Auth0
 * Cloudinary
 
+Note that I deliberately choose to *not* use express here because I wanted to try doing things on my own.
+
 ## Getting Started
 
 ### Prerequisites

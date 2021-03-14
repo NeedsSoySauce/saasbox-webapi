@@ -1,11 +1,12 @@
 const Item = require('../../models/item.js');
 const ItemsRepo = require('../../data/itemsRepo.js');
 const StorageService = require('../../services/storage.js');
+const { withDefaultMiddleWare } = require('../../lib/config.js');
 
 const storageService = new StorageService();
 const itemsRepo = new ItemsRepo(storageService);
 
-exports.createItemHandler = async (event) => {
+const handler = async (event) => {
     const userId = event.requestContext.authorizer.userId;
 
     let body = null;
@@ -35,9 +36,11 @@ exports.createItemHandler = async (event) => {
 
     return {
         statusCode: 201,
-        body: JSON.stringify(item),
         headers: {
             Location: item.url
-        }
+        },
+        body: JSON.stringify(item)
     };
 };
+
+exports.createItemHandler = withDefaultMiddleWare(handler);
