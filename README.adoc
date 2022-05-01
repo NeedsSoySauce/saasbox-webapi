@@ -21,7 +21,7 @@ The specific technologies this project relies on are:
 * Auth0
 * Cloudinary
 
-NOTE:: For my own learning, I deliberately chose **not to use `express`**.
+NOTE: For my own learning, I deliberately chose **not to use `express`**.
 
 == Getting Started
 
