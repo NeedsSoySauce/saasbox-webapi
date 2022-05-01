@@ -65,10 +65,10 @@ This key shoudl be returned by the JWKS endpoint.
 To build and deploy for the first time, run:
 
 [source, powershell]
-====
+----
 sam build
 sam deploy --guided
-====
+----
 
 The `--guided`` parameter prompts AWS SAM to guide you through configuration.
 In particular, it will ask for the following information:
@@ -97,7 +97,7 @@ If accepted, creates a TOML file that saves your current configuration for futur
 
 For subsequent deployments, run:
 [source, powershell]
-====
+----
 sam build
 sam deploy
-====
+----
