@@ -11,6 +11,7 @@ My goals for this project are to:
 == Tech Stack
 
 The specific technologies this project relies on are:
+
 * Amazon Web Service (AWS)
 ** Serverless Application Model (AWS SAM)
 ** API Gateway
