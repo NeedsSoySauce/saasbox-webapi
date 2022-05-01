@@ -70,7 +70,7 @@ sam build
 sam deploy --guided
 ----
 
-The `--guided`` parameter prompts AWS SAM to guide you through configuration.
+The `--guided` parameter prompts AWS SAM to guide you through configuration.
 In particular, it will ask for the following information:
 
 Stack Name:: 
