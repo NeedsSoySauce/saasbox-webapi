@@ -1,0 +1,103 @@
+= saasbox-webapi
+
+This repo contains the backend for a minimal note-taking web application.
+My goals for this project are to:
+
+* Build a functional note-taking application for little-to-no cost
+* Experiment with and compare various website rendering methods (CSR, SSG, and SSR)
+* Use "serverless" technologies for deployment without needing to directly manage infrastructure
+* Learn about and use "infrastructure-as-code"
+
+== Tech Stack
+
+The specific technologies this project relies on are:
+* Amazon Web Service (AWS)
+** Serverless Application Model (AWS SAM)
+** API Gateway
+** Lambda
+** DynamoDB
+* Node.js
+* Auth0
+* Cloudinary
+
+NOTE:: For my own learning, I deliberately chose **not to use `express`**.
+
+== Getting Started
+
+=== Pre-requisites
+
+* AWS SAM
+* Docker
+* Node.js
+* An Auth0 account (or some other compatible identity provider that supports JSON Web Tokens)
+* A Cloudinary account
+
+=== Setup
+
+. Create a copy of the `template.empty.yml` file, and name it `template.yml`.
++
+This file is used to deploy prerequisite services on AWS and upload code.
+It contains the following environment variables:
+
+`JWKS_URI`:: The JSON Web Key Sets (JWKS) endpoint
+
+`AUDIENCE`:: 
+Audience, used for authentication.
+This should be set to the URL of the webapi when deployed, e.g. the value of the `WebEndpont` output variable from AWS SAM.
+
+`ISSUER`:: The issuer URL.
+
+`ALGORITHM`:: The algorithm used to sign JSON Web Tokens (JWT).
+
+`KID`:: The Key ID of the public signing key used for verifying JWTs.
+This key shoudl be returned by the JWKS endpoint.
+
+`CLOUDINARY_CLOUD_NAME`:: Cloud name in Cloudinary.
+
+`CLOUDINARY_API_KEY`:: Cloudinary API key.
+
+`CLOUDINARY_API_SECRET`:: Cloudianry API secret.
+
+== Deployment
+
+=== First-time Deployment
+
+To build and deploy for the first time, run:
+
+[source, powershell]
+====
+sam build
+sam deploy --guided
+====
+
+The `--guided`` parameter prompts AWS SAM to guide you through configuration.
+In particular, it will ask for the following information:
+
+Stack Name:: 
+Name of the group under which all resources associated with your deployment is placed under.
+
+AWS Region::
+The AWS region where your resources are deployed, e.g. `ap-southeast-1`.
+
+Confirm changes before deploy::
+If set to yes, AWS SAM prompts you to confirm any changes you have made prior to a deployment.
+Recommended.
+
+Allow SAM CLI IAM role creation::
+Some resources involved during deployment may require the setup of AWS IAM roles.
+This option determines how such role permissions are supplied.
++
+By default, I recommend accepting this.
+Otherwise, each `sam deploy` command needs to be passed with the parameter `--capabilities CAPABILITY_IAM`.
+
+Save arguments to `samconfig.toml`::
+If accepted, creates a TOML file that saves your current configuration for future deployments.
+
+=== Subsequent Deployments
+
+For subsequent deployments, run:
+[source, powershell]
+====
+sam build
+sam deploy
+====
